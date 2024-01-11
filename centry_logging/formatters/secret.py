@@ -38,16 +38,16 @@ class SecretFormatter(logging.Formatter):
             fmt=fmt, datefmt=datefmt, style=style, validate=validate, defaults=defaults
         )
         #
-        self.secrets = set()
-        self.update_secrets(secrets)
+        self.replacer = secrets_replacer
+        self.restricted_stop_words = {'', self.replacer}
         #
         try:
             self.formatter = getattr(self, secrets_formatter)
         except AttributeError:
             self.formatter = self.replacer_re
         #
-        self.replacer = secrets_replacer
-        self.restricted_stop_words = {'', self.replacer}
+        self.secrets = set()
+        self.update_secrets(secrets)
 
     def update_secrets(self, secrets):
         """ Update secret list """
