@@ -19,6 +19,7 @@
 
 import time
 import logging
+import logging.handlers
 import traceback
 
 from ..emitters.loki import CarrierLokiLogEmitter
