@@ -106,6 +106,7 @@ def init(level=logging.INFO, *, config=None, force=False):
             handlers.append(handler)
         else:
             root_level = config.get("level", root_level)
+            filters = []
             #
             if "formatter" in config:
                 opts = config.get("formatter").copy()
@@ -120,9 +121,24 @@ def init(level=logging.INFO, *, config=None, force=False):
             else:
                 state.formatter = SecretFormatter()
             #
+            for filter_cfg in config.get("filters", []):
+                opts = filter_cfg.copy()
+                #
+                filter_pkg, filter_name = opts.pop("type").rsplit(".", 1)
+                filter_cls = getattr(
+                    importlib.import_module(filter_pkg),
+                    filter_name
+                )
+                #
+                filter_obj = filter_cls(**opts)
+                filters.append(filter_obj)
+            #
             if "handlers" not in config:
                 handler = logging.StreamHandler()
                 handler.setFormatter(state.formatter)
+                #
+                for filter_obj in filters:
+                    handler.addFilter(filter_obj)
                 #
                 handlers.append(handler)
             #
@@ -137,6 +153,9 @@ def init(level=logging.INFO, *, config=None, force=False):
                 #
                 handler = handler_cls(**opts)
                 handler.setFormatter(state.formatter)
+                #
+                for filter_obj in filters:
+                    handler.addFilter(filter_obj)
                 #
                 handlers.append(handler)
         #

@@ -48,7 +48,7 @@ class EventNodeLogHandler(logging.Handler):
         self.settings = settings
         #
         self.event_node = make_event_node(settings.get("event_node"))
-        self.event_node.start()
+        self.event_node.start(emit_only=True)
         #
         self.emitter = EventNodeLogEmitter(
             event_node=self.event_node,
@@ -86,7 +86,7 @@ class EventNodeBufferedLogHandler(logging.handlers.BufferingHandler):
         self.settings = settings
         #
         self.event_node = make_event_node(settings.get("event_node"))
-        self.event_node.start()
+        self.event_node.start(emit_only=True)
         #
         self.emitter = EventNodeLogEmitter(
             event_node=self.event_node,
