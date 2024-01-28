@@ -85,7 +85,7 @@ def exception(msg, *args, **kwargs):
 # Init
 #
 
-def init(level=logging.INFO, *, config=None, force=False):
+def init(level=logging.INFO, *, config=None, force=False):  # pylint: disable=R0912,R0914
     """ Initialize logging """
     with state.lock:
         if state.initialized and not force:

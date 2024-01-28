@@ -67,6 +67,15 @@ class SecretFormatter(logging.Formatter):
                 if isinstance(item.formatter, self.__class__):
                     self.secrets.update(item.formatter.secrets)
         #
+        elif isinstance(secrets, bytes):
+            try:
+                self.secrets.update({secrets.decode(errors="ignore")})
+            except:  # pylint: disable=W0702
+                pass
+        #
+        elif isinstance(secrets, str):
+            self.secrets.update({secrets})
+        #
         else:  # list / iterable
             self.secrets.update(set(map(str, secrets)))
         #
