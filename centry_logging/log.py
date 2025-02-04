@@ -21,6 +21,8 @@ import logging
 import inspect
 import importlib
 
+from logging import shutdown
+
 from .formatters.secret import SecretFormatter
 from .internal import state
 from .tools import patches
