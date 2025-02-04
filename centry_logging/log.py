@@ -21,7 +21,7 @@ import logging
 import inspect
 import importlib
 
-from logging import shutdown
+from logging import shutdown  # pylint: disable=W0611
 
 from .formatters.secret import SecretFormatter
 from .internal import state
