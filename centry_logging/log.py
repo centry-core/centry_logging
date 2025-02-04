@@ -190,3 +190,8 @@ def update_secrets(secrets):
     with state.lock:
         if state.formatter is not None and isinstance(state.formatter, SecretFormatter):
             state.formatter.update_secrets(secrets)
+
+def flush():
+    """ Flush handlers """
+    for handler in list(logging.root.handlers):
+        handler.flush()
