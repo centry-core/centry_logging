@@ -46,6 +46,15 @@ def get_outer_logger():
         inspect.currentframe().f_back.f_back.f_globals["__name__"]
     )
 
+
+def prepare_handler(handler):
+    """ Prepare logging handler object """
+    if state.formatter is not None:
+        handler.setFormatter(state.formatter)
+    #
+    for filter_obj in state.filters:
+        handler.addFilter(filter_obj)
+
 #
 # Log methods
 #
@@ -94,22 +103,20 @@ def init(level=logging.INFO, *, config=None, force=False):  # pylint: disable=R0
         if state.initialized and not force:
             return
         #
-        root_level = level
+        state.root_level = level
         #
         # Prepare handlers according to config
-        #
-        filters = []
-        handlers = []
         #
         if config is None or not isinstance(config, dict):
             state.formatter = SecretFormatter()
             #
             handler = logging.StreamHandler()
-            handler.setFormatter(state.formatter)
             #
-            handlers.append(handler)
+            prepare_handler(handler)
+            #
+            state.handlers.append(handler)
         else:
-            root_level = config.get("level", root_level)
+            state.root_level = config.get("level", state.root_level)
             #
             if "formatter" in config:
                 opts = config.get("formatter").copy()
@@ -134,16 +141,14 @@ def init(level=logging.INFO, *, config=None, force=False):  # pylint: disable=R0
                 )
                 #
                 filter_obj = filter_cls(**opts)
-                filters.append(filter_obj)
+                state.filters.append(filter_obj)
             #
             if "handlers" not in config:
                 handler = logging.StreamHandler()
-                handler.setFormatter(state.formatter)
                 #
-                for filter_obj in filters:
-                    handler.addFilter(filter_obj)
+                prepare_handler(handler)
                 #
-                handlers.append(handler)
+                state.handlers.append(handler)
             #
             for handler_cfg in config.get("handlers", []):
                 opts = handler_cfg.copy()
@@ -155,22 +160,18 @@ def init(level=logging.INFO, *, config=None, force=False):  # pylint: disable=R0
                 )
                 #
                 handler = handler_cls(**opts)
-                handler.setFormatter(state.formatter)
                 #
-                for filter_obj in filters:
-                    handler.addFilter(filter_obj)
+                prepare_handler(handler)
                 #
-                handlers.append(handler)
+                state.handlers.append(handler)
         #
         # Add local handler
         #
         local_handler = ThreadLocalHandler()
-        local_handler.setFormatter(state.formatter)
         #
-        for filter_obj in filters:
-            local_handler.addFilter(filter_obj)
+        prepare_handler(local_handler)
         #
-        handlers.append(local_handler)
+        state.handlers.append(local_handler)
         #
         # Remove existing handlers
         #
@@ -183,10 +184,10 @@ def init(level=logging.INFO, *, config=None, force=False):  # pylint: disable=R0
         #
         # Apply new handlers
         #
-        for handler in handlers:
+        for handler in state.handlers:
             logging.root.addHandler(handler)
         #
-        logging.root.setLevel(root_level)
+        logging.root.setLevel(state.root_level)
         logging.raiseExceptions = False
         patches.apply()
         #

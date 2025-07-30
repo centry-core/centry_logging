@@ -26,4 +26,8 @@ initialized = False
 lock = threading.Lock()
 local = threading.local()
 
+root_level = None
 formatter = None
+
+filters = []
+handlers = []
