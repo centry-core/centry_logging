@@ -19,9 +19,12 @@ from setuptools import setup, find_packages
 with open('requirements.txt', encoding='utf-8') as file:
     required = file.read().splitlines()
 
+with open("version.txt", "r", encoding="utf-8") as f:
+    version = f.read().splitlines()[0].strip()
+
 setup(
     name='centry_logging',
-    version='1.0.0',
+    version=version,
     description='Centry logging core',
     long_description='Logging core for CentryCore/Pylon based apps',
     url='https://getcarrier.io',

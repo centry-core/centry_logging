@@ -1,6 +1,5 @@
 #!/usr/bin/python3
 # coding=utf-8
-# pylint: disable=C0103
 
 #   Copyright 2024 getcarrier.io
 #
@@ -16,14 +15,22 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-""" Internal """
+""" Handler """
 
-import threading
+import logging
+import traceback
+
+from ..internal import state
 
 
-initialized = False
+class ThreadLocalHandler(logging.Handler):
+    """ Log handler - send logs to another handler in thread local """
 
-lock = threading.Lock()
-local = threading.local()
-
-formatter = None
+    def emit(self, record):
+        try:
+            if hasattr(state.local, "handler"):
+                state.local.handler.emit(record)
+        except:  # pylint: disable=W0702
+            # In this case we should NOT use logging to log logging error. Only print()
+            print("[FATAL] Exception during sending logs to local handler")
+            traceback.print_exc()

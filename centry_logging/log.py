@@ -24,6 +24,7 @@ import importlib
 from logging import shutdown  # pylint: disable=W0611
 
 from .formatters.secret import SecretFormatter
+from .handlers.local import ThreadLocalHandler
 from .internal import state
 from .tools import patches
 
@@ -97,6 +98,7 @@ def init(level=logging.INFO, *, config=None, force=False):  # pylint: disable=R0
         #
         # Prepare handlers according to config
         #
+        filters = []
         handlers = []
         #
         if config is None or not isinstance(config, dict):
@@ -108,7 +110,6 @@ def init(level=logging.INFO, *, config=None, force=False):  # pylint: disable=R0
             handlers.append(handler)
         else:
             root_level = config.get("level", root_level)
-            filters = []
             #
             if "formatter" in config:
                 opts = config.get("formatter").copy()
@@ -160,6 +161,16 @@ def init(level=logging.INFO, *, config=None, force=False):  # pylint: disable=R0
                     handler.addFilter(filter_obj)
                 #
                 handlers.append(handler)
+        #
+        # Add local handler
+        #
+        local_handler = ThreadLocalHandler()
+        local_handler.setFormatter(state.formatter)
+        #
+        for filter_obj in filters:
+            local_handler.addFilter(filter_obj)
+        #
+        handlers.append(local_handler)
         #
         # Remove existing handlers
         #
