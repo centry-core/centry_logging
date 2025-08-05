@@ -104,6 +104,8 @@ def init(level=logging.INFO, *, config=None, force=False):  # pylint: disable=R0
             return
         #
         state.root_level = level
+        state.filters.clear()
+        state.handlers.clear()
         #
         # Prepare handlers according to config
         #
